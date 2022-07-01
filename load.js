@@ -4,12 +4,15 @@ const context = canvas.getContext('2d');
 var nodes = [];
 var edges = [];
 
-const WHITE =  '#FFFFFF';
+const colors = ['#FFFFFF', "#ffc800",'#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0',
+                   '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ffe119', '#9a6324', '#fffac8',
+                   '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
 const EDGE = '#009999';
 const  SELECTED = '#88aaaa';
-const LIGHTBLUE =  '#22cccc';
+//const LIGHTBLUE =  '#22cccc';
 const btn_mode = document.getElementById('play_button');
 const btn_clear = document.getElementById('clear');
+
 
 btn_mode.addEventListener('click', function handleClick() {
   if (btn_mode.textContent === 'Editing'){
@@ -25,21 +28,14 @@ btn_mode.addEventListener('click', function handleClick() {
 });
 
 function  getMousePos(evt) {
-  var rect = canvas.getBoundingClientRect(), // abs. size of element
-    scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for x
-    scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for y
-
+  var rect = canvas.getBoundingClientRect(),
+    scaleX = canvas.width / rect.width,
+    scaleY = canvas.height / rect.height;
   return {
-    x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
-    y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+    x: (evt.clientX - rect.left) * scaleX,
+    y: (evt.clientY - rect.top) * scaleY
   }
 }
-// function resize() {
-//     canvas.width = 1000;
-//     canvas.height = 600;
-// }
-// window.onresize = resize;
-// resize();
 function drawNode(node) {
     context.beginPath();
     context.fillStyle = node.fillStyle;
@@ -52,14 +48,8 @@ var selection = undefined;
 function within(x, y) {
     return nodes.find(n => {
         return (x-n.x)**2+(y-n.y)**2 <= n.radius**2;
-        //this is checking if you clicked in the square surrounding the circle
-        // return x > (n.x - n.radius) &&
-        //     y > (n.y - n.radius) &&
-        //     x < (n.x + n.radius) &&
-        //     y < (n.y + n.radius);
     });
 }
-//#22cccc
 window.onmousemove = move;
 window.onmousedown = down;
 window.onmouseup = up;
@@ -78,8 +68,6 @@ function create_node(x_0, y_0, color){
   return node;
 }
 function create_edge(fromNode, toNode, round){
-  // let fromNode = edges[i].from;
-  // let toNode = edges[i].to;
   if(round){
     context.beginPath();
     context.strokeStyle = fromNode.strokeStyle;
@@ -90,8 +78,6 @@ function create_edge(fromNode, toNode, round){
     var dist = Math.sqrt((d-b)**2+(a-c)**2);
     context.moveTo(a, b);
     context.quadraticCurveTo((a+c)/2+40*(d-b)/dist, (b+d)/2+40*(a-c)/dist, c, d);
-    // context.arc((toNode.x + fromNode.x)/2, (toNode.y + fromNode.y)/2, Math.sqrt((fromNode.x - toNode.x)**2 + (fromNode.y -toNode.y)**2)/2,
-    //              0, Math.PI, true);
     context.stroke();
   }
   else{
@@ -102,10 +88,6 @@ function create_edge(fromNode, toNode, round){
     context.stroke();
   }
 }
-// function click(e) {
-//   create_node(e.offsetX , e.offsetY);
-// }
-
 function draw() {
   context.clearRect(0, 0, window.innerWidth, window.innerHeight);
   for (let i = 0; i < edges.length; i++)
@@ -125,7 +107,7 @@ function draw() {
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
             context.beginPath();
-            context.fillStyle = node.value ? LIGHTBLUE : WHITE;
+            context.fillStyle = colors[node.value];
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
             context.strokeStyle = node.strokeStyle;
             context.fill();
@@ -133,7 +115,6 @@ function draw() {
         }
     }
 }
-
 function move(e) {
     if (btn_mode.textContent == 'Editing'){
       if (selection && e.buttons){
@@ -179,6 +160,7 @@ function down(e) {
     }
 }
 function up(e) {
+   var num_colors = parseInt(document.getElementById('num_colors_input').value);
     var pos =  getMousePos(e);
     if (btn_mode.textContent == 'Editing'){
       if (!selection){
@@ -193,8 +175,8 @@ function up(e) {
     else{
       let target = within(e.offsetX, e.offsetY);
       if (target){
-        target.value = (target.value +1)%2;
-        target.clicks = (target.clicks + 1)%2;
+        target.value = (target.value +1)%num_colors;
+        target.clicks = (target.clicks + 1)%num_colors;
         for(let i = 0; i < edges.length;i++){
           var other = undefined;
           if (edges[i].from == target)
@@ -202,7 +184,7 @@ function up(e) {
           else if (edges[i].to == target)
             other = edges[i].from;
           if (other)
-            other.value = (other.value + 1)%2;
+            other.value = (other.value + 1)%num_colors;
         }
         draw();
       }
@@ -232,13 +214,16 @@ function key_up(e){
     }
   }
 }
-// document.getElementById("generate-button").onclick =
 function clear_puzzle(){
   if (btn_mode.textContent == 'Editing'){
     nodes = [];
     edges = [];
-    draw();
   }
+  else {
+    for (i = 0; i < nodes.length; i++)
+      nodes[i].value = 0;
+  }
+  draw();
 }
 function generate_puzzle(){
   nodes = [];
