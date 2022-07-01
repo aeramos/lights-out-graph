@@ -13,6 +13,7 @@ const colors_dict = {'#FFFFFF' : 'white', "#ffc800" : 'dark yellow', '#e6194b' :
                    '#e6beff' : 'light purple', '#ffe119' : 'yellow', '#9a6324' : 'brown', '#fffac8' : 'lemon',
                    '#800000' : 'red', '#aaffc3':'mint', '#808000': 'olive', '#ffd8b1' : 'light brown', '#000075' : 'dark blue',
                    '#808080' : 'grey'}
+                   
 const EDGE = '#009999';
 const  SELECTED = '#88aaaa';
 //const LIGHTBLUE =  '#22cccc';
@@ -22,7 +23,6 @@ const btn_clear = document.getElementById('clear');
 var text = document.createTextNode('Mode: ');
 var child = document.getElementById('play_button');
 child.parentNode.insertBefore(text, child);
-
 
 btn_mode.addEventListener('click', function handleClick() {
   if (btn_mode.textContent === 'Editing'){
@@ -239,8 +239,6 @@ function clear_puzzle(){
   }
   draw();
 }
-//check in mouse up event if the puzzle is solved
-//when user clicks a target and changes something
 function congratulate(){
   if (document.getElementById("congratulate").checked){
     var val = nodes[0].value;
@@ -250,7 +248,6 @@ function congratulate(){
       if (nodes[i].value != val)
         solved = false;
     }
-    console.log(solved);
     if (solved){
       if (val == 0){
         message = "Congratulations, you've found a quiet pattern!";
