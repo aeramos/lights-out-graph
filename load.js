@@ -7,6 +7,12 @@ var edges = [];
 const colors = ['#FFFFFF', "#ffc800",'#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0',
                    '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ffe119', '#9a6324', '#fffac8',
                    '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
+const colors_dict = {'#FFFFFF' : 'white', "#ffc800" : 'dark yellow', '#e6194b' : 'dark pink', '#3cb44b' : 'green',
+                    '#4363d8' : 'blue', '#f58231':'orange', '#911eb4' : 'purple', '#46f0f0' : 'light blue',
+                   '#f032e6' : 'pink', '#bcf60c' : 'light green', '#fabebe' : 'light pink', '#008080' : 'cyan',
+                   '#e6beff' : 'light purple', '#ffe119' : 'yellow', '#9a6324' : 'brown', '#fffac8' : 'lemon',
+                   '#800000' : 'red', '#aaffc3':'mint', '#808000': 'olive', '#ffd8b1' : 'light brown', '#000075' : 'dark blue',
+                   '#808080' : 'grey'}
 const EDGE = '#009999';
 const  SELECTED = '#88aaaa';
 //const LIGHTBLUE =  '#22cccc';
@@ -164,7 +170,7 @@ function down(e) {
 }
 function up(e) {
    var num_colors = parseInt(document.getElementById('num_colors_input').value);
-    var pos =  getMousePos(e);
+   var pos =  getMousePos(e);
     if (btn_mode.textContent == 'Editing'){
       if (!selection){
         if (pos.x>0 && pos.x<=canvas.width && pos.y>0 && pos.y<=canvas.height)
@@ -190,6 +196,7 @@ function up(e) {
             other.value = (other.value + 1)%num_colors;
         }
         draw();
+        congratulate();
       }
 
     }
@@ -227,6 +234,29 @@ function clear_puzzle(){
       nodes[i].value = 0;
   }
   draw();
+}
+//check in mouse up event if the puzzle is solved
+//when user clicks a target and changes something
+function congratulate(){
+  if (document.getElementById("congratulate").checked){
+    var val = nodes[0].value;
+    var solved = true;
+    var message = ""
+    for (i=1; i<nodes.length; i++){
+      if (nodes[i].value != val)
+        solved = false;
+    }
+    console.log(solved);
+    if (solved){
+      if (val == 0){
+        message = "Congratulations, you've found a quiet pattern!";
+      }
+      else
+        message = "Congratulations, you've found a solution for " + colors_dict[colors[val]] +"!";
+      alert(message);
+
+    }
+  }
 }
 function generate_puzzle(){
   nodes = [];
