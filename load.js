@@ -19,6 +19,10 @@ const  SELECTED = '#88aaaa';
 const btn_mode = document.getElementById('play_button');
 const btn_clear = document.getElementById('clear');
 
+var text = document.createTextNode('Mode: ');
+var child = document.getElementById('play_button');
+child.parentNode.insertBefore(text, child);
+
 
 btn_mode.addEventListener('click', function handleClick() {
   if (btn_mode.textContent === 'Editing'){
