@@ -96,7 +96,7 @@ function draw() {
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
             context.beginPath();
-            context.fillStyle = node.selected ? SELECTED : WHITE;
+            context.fillStyle = colors[node.value];
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
             context.strokeStyle = node.strokeStyle;
             context.fill();
