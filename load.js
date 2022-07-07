@@ -4,6 +4,7 @@ const context = canvas.getContext('2d');
 var nodes = [];
 var edges = [];
 var clicks = 1;
+
 const colors = ['#FFFFFF', "#ffc800",'#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0',
                    '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ffe119', '#9a6324', '#fffac8',
                    '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
@@ -16,7 +17,6 @@ const colors_dict = {'#FFFFFF' : 'white', "#ffc800" : 'dark yellow', '#e6194b' :
 
 const EDGE = '#009999';
 const  SELECTED = '#88aaaa';
-//const LIGHTBLUE =  '#22cccc';
 const btn_mode = document.getElementById('play_button');
 const btn_clear = document.getElementById('clear');
 
@@ -30,6 +30,8 @@ btn_mode.addEventListener('click', function handleClick() {
       nodes[i].value = 0;
     btn_mode.textContent = 'Playing';
     btn_clear.textContent = 'Reset Puzzle';
+    if(document.getElementById("legend")!=null)
+      document.getElementById("legend").remove();
     addElement();
   }
   else{
@@ -41,26 +43,20 @@ btn_mode.addEventListener('click', function handleClick() {
   }
 });
 
-//function get_num_clicks(){
-// var num_colors = parseInt(document.getElementById('num_colors_input').value);
-// var buttons = document.getElementsByTagName('button');
-// for (let c = 1; c < num_colors; c++) {
-//   let button = buttons[c];
-//   button.onclick = function(){
-//     clicks = button.value;
-//   }
-// }
-//}
+var set_num_clicks = function(c){
+      clicks = c;
+};
+
 function addElement () {
   var newDiv = document.createElement("div");
   newDiv.setAttribute("id", "legend");
   var title = document.createTextNode("Legend: ");
+  newDiv.style.fontSize = "15px";
   newDiv.appendChild(title);
   var num_colors = parseInt(document.getElementById('num_colors_input').value);
   for(var c = 1; c < num_colors; c++){
-        var content = document.createElement('button');
-        content.setAttribute("value", c.toString());
-        const inner_str = "<span style='color:"+colors[c]+";font-weight:bold';font-size:40px'>"+c.toString()+" </span>";
+        var content = document.createElement("span");
+        const inner_str = "<button value ="+c+" style='color:"+colors[c]+"; font-weight:bold; font-size:15px' onclick = set_num_clicks("+c+")>"+c.toString()+"</button>";
       content.innerHTML = inner_str;
       newDiv.appendChild(content);
     }
@@ -137,15 +133,6 @@ function draw() {
             context.strokeStyle = node.strokeStyle;
             context.fill();
             context.stroke();
-            context.font = "12px Verdana";
-            context.beginPath();
-            context.fillStyle = "#000000";
-            if (node.clicks.toString().length>1){
-              context.fillText(node.clicks.toString(), node.x-8, node.y+4);
-            }
-            else
-              context.fillText(node.clicks.toString(), node.x-3, node.y+4);
-            context.fill();
         }
     }
   else{
@@ -229,8 +216,8 @@ function up(e) {
     else{
       let target = within(e.offsetX, e.offsetY);
       if (target){
-        target.value = (target.value +1)%num_colors;
-        target.clicks = (target.clicks + 1)%num_colors;
+        target.value = (target.value + clicks)%num_colors;
+        target.clicks = (target.clicks + clicks)%num_colors;
         for(let i = 0; i < edges.length;i++){
           var other = undefined;
           if (edges[i].from == target)
@@ -238,7 +225,7 @@ function up(e) {
           else if (edges[i].to == target)
             other = edges[i].from;
           if (other)
-            other.value = (other.value + 1)%num_colors;
+            other.value = (other.value + clicks)%num_colors;
         }
         draw();
         congratulate();
@@ -364,6 +351,20 @@ function generate_puzzle(){
         edges.push({from: all_nodes[i+1][k], to: all_nodes[i][k+1], round: false});
       }
     }
-  }
+    //if (document.getElementById("top_bottom").checked){
+
+      // connecting top and bottom edges
+      // for (let i = 0; i<=num_cols-1; i++)
+      //     edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
+       // for (let i = 1; i<=num_rows-1; i++)
+       //   edges.push({from: all_nodes[i][0], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
+    //}
+    // if (document.getElementById("sides").checked){
+    //   for (let i = 0; i<=num_cols-1; i++)
+    //       edges.push({from: all_nodes[i][0], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
+       // for (let i = 1; i<=num_rows-1; i++)
+       //   edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-i-1][num_cols-1], round: true});
+    //}
+   //}
   draw();
 }
