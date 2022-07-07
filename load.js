@@ -3,7 +3,7 @@ const context = canvas.getContext('2d');
 
 var nodes = [];
 var edges = [];
-
+var clicks = 1;
 const colors = ['#FFFFFF', "#ffc800",'#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0',
                    '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ffe119', '#9a6324', '#fffac8',
                    '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
@@ -13,7 +13,7 @@ const colors_dict = {'#FFFFFF' : 'white', "#ffc800" : 'dark yellow', '#e6194b' :
                    '#e6beff' : 'light purple', '#ffe119' : 'yellow', '#9a6324' : 'brown', '#fffac8' : 'lemon',
                    '#800000' : 'red', '#aaffc3':'mint', '#808000': 'olive', '#ffd8b1' : 'light brown', '#000075' : 'dark blue',
                    '#808080' : 'grey'}
-                   
+
 const EDGE = '#009999';
 const  SELECTED = '#88aaaa';
 //const LIGHTBLUE =  '#22cccc';
@@ -30,12 +30,43 @@ btn_mode.addEventListener('click', function handleClick() {
       nodes[i].value = 0;
     btn_mode.textContent = 'Playing';
     btn_clear.textContent = 'Reset Puzzle';
+    addElement();
   }
   else{
     btn_mode.textContent = 'Editing';
     btn_clear.textContent = 'Clear Puzzle';
+    if(document.getElementById("legend")!=null)
+      document.getElementById("legend").remove();
+
   }
 });
+
+//function get_num_clicks(){
+// var num_colors = parseInt(document.getElementById('num_colors_input').value);
+// var buttons = document.getElementsByTagName('button');
+// for (let c = 1; c < num_colors; c++) {
+//   let button = buttons[c];
+//   button.onclick = function(){
+//     clicks = button.value;
+//   }
+// }
+//}
+function addElement () {
+  var newDiv = document.createElement("div");
+  newDiv.setAttribute("id", "legend");
+  var title = document.createTextNode("Legend: ");
+  newDiv.appendChild(title);
+  var num_colors = parseInt(document.getElementById('num_colors_input').value);
+  for(var c = 1; c < num_colors; c++){
+        var content = document.createElement('button');
+        content.setAttribute("value", c.toString());
+        const inner_str = "<span style='color:"+colors[c]+";font-weight:bold';font-size:40px'>"+c.toString()+" </span>";
+      content.innerHTML = inner_str;
+      newDiv.appendChild(content);
+    }
+  const currentDiv = document.getElementById("d1");
+  document.body.insertBefore(newDiv, currentDiv);
+}
 
 function  getMousePos(evt) {
   var rect = canvas.getBoundingClientRect(),
@@ -45,14 +76,6 @@ function  getMousePos(evt) {
     x: (evt.clientX - rect.left) * scaleX,
     y: (evt.clientY - rect.top) * scaleY
   }
-}
-function drawNode(node) {
-    context.beginPath();
-    context.fillStyle = node.fillStyle;
-    context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
-    context.strokeStyle = node.strokeStyle;
-    context.stroke();
-    context.fill();
 }
 var selection = undefined;
 function within(x, y) {
@@ -68,7 +91,7 @@ function create_node(x_0, y_0, color){
   let node = {
       x: x_0,
       y: y_0,
-      radius: 10,
+      radius: 12,
       selected: false,
       value : 0,
       clicks : 0
@@ -114,6 +137,15 @@ function draw() {
             context.strokeStyle = node.strokeStyle;
             context.fill();
             context.stroke();
+            context.font = "12px Verdana";
+            context.beginPath();
+            context.fillStyle = "#000000";
+            if (node.clicks.toString().length>1){
+              context.fillText(node.clicks.toString(), node.x-8, node.y+4);
+            }
+            else
+              context.fillText(node.clicks.toString(), node.x-3, node.y+4);
+            context.fill();
         }
     }
   else{
@@ -125,6 +157,15 @@ function draw() {
             context.strokeStyle = node.strokeStyle;
             context.fill();
             context.stroke();
+            context.font = "12px Verdana";
+            context.beginPath();
+            context.fillStyle = "#000000";
+            if (node.clicks.toString().length>1){
+              context.fillText(node.clicks.toString(), node.x-8, node.y+4);
+            }
+            else
+              context.fillText(node.clicks.toString(), node.x-3, node.y+4);
+            context.fill();
         }
     }
 }
@@ -260,6 +301,9 @@ function congratulate(){
   }
 }
 function generate_puzzle(){
+  if(document.getElementById("legend")!=null)
+    document.getElementById("legend").remove();
+  addElement();
   nodes = [];
   edges = [];
   var all_nodes = [];
