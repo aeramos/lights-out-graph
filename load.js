@@ -365,6 +365,6 @@ function generate_puzzle(){
        // for (let i = 1; i<=num_rows-1; i++)
        //   edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-i-1][num_cols-1], round: true});
     //}
-   //}
+   }
   draw();
 }
