@@ -37,6 +37,9 @@ btn_mode.addEventListener('click', function handleClick() {
   else{
     btn_mode.textContent = 'Editing';
     btn_clear.textContent = 'Clear Puzzle';
+    for (i = 0; i < nodes.length; i++)
+      nodes[i].value = 0;
+    draw();
     if(document.getElementById("legend")!=null)
       document.getElementById("legend").remove();
 
@@ -83,7 +86,7 @@ window.onmousemove = move;
 window.onmousedown = down;
 window.onmouseup = up;
 window.onkeyup = key_up;
-function create_node(x_0, y_0, color){
+function create_node(x_0, y_0){
   let node = {
       x: x_0,
       y: y_0,
@@ -96,10 +99,13 @@ function create_node(x_0, y_0, color){
   draw();
   return node;
 }
-function create_edge(fromNode, toNode, round){
+function create_edge(fromNode, toNode, round, dash){
+  if(dash)
+    context.setLineDash([5, 3]);
+  else
+    context.setLineDash([]);
   if(round){
     context.beginPath();
-    context.strokeStyle = fromNode.strokeStyle;
     var a = fromNode.x;
     var b = fromNode.y;
     var c = toNode.x;
@@ -111,7 +117,7 @@ function create_edge(fromNode, toNode, round){
   }
   else{
     context.beginPath();
-    context.strokeStyle = fromNode.strokeStyle;
+
     context.moveTo(fromNode.x, fromNode.y);
     context.lineTo(toNode.x, toNode.y);
     context.stroke();
@@ -120,17 +126,17 @@ function create_edge(fromNode, toNode, round){
 function draw() {
   context.clearRect(0, 0, window.innerWidth, window.innerHeight);
   for (let i = 0; i < edges.length; i++)
-      create_edge(edges[i].from, edges[i].to, edges[i].round);
+      create_edge(edges[i].from, edges[i].to, edges[i].round, edges[i].dash);
   if (btn_mode.textContent == 'Editing'){
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
+            context.setLineDash([]);
             context.beginPath();
             if (node.selected)
               context.fillStyle = SELECTED;
             else
               context.fillStyle = colors[node.value];
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
-            context.strokeStyle = node.strokeStyle;
             context.fill();
             context.stroke();
         }
@@ -138,10 +144,10 @@ function draw() {
   else{
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
+            context.setLineDash([]);
             context.beginPath();
             context.fillStyle = colors[node.value];
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
-            context.strokeStyle = node.strokeStyle;
             context.fill();
             context.stroke();
             context.font = "12px Verdana";
@@ -184,7 +190,7 @@ function down(e) {
           if (selection && selection !== target) {
             var edge = find_edge(target, selection);
               if (!edge)
-                edges.push({ from: selection, to: target, round: false });
+                edges.push({ from: selection, to: target, round: false, dash: false });
               else {
                   for (let j = 0; j < edges.length; j++){
                     if (edges[j] == edge ){
@@ -262,8 +268,10 @@ function clear_puzzle(){
     edges = [];
   }
   else {
-    for (i = 0; i < nodes.length; i++)
+    for (i = 0; i < nodes.length; i++){
       nodes[i].value = 0;
+      nodes[i].clicks = 0;
+    }
   }
   draw();
 }
@@ -308,26 +316,26 @@ function generate_puzzle(){
     // horizontal edges
     for (let i = 0; i<=num_rows-1; i++){
       for (let k = 0; k<num_cols-1; k++){
-        edges.push({from: all_nodes[i][k], to: all_nodes[i][k+1], round: false});
+        edges.push({from: all_nodes[i][k], to: all_nodes[i][k+1], round: false, dash: false});
       }
     }
     // vertical edges
     for (let i = 0; i<num_rows-1; i++){
       for (let k = 0; k<=num_cols-1; k++){
-        edges.push({from: all_nodes[i][k], to: all_nodes[i+1][k], round: false});
+        edges.push({from: all_nodes[i][k], to: all_nodes[i+1][k], round: false, dash: false});
       }
     }
     if (document.getElementById("top_bottom").checked){
 
       // connecting top and bottom edges
       for (let i = 0; i<=num_cols-1; i++){
-        edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-1][i], round: true});
+        edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-1][i], round: true, dash: false});
       }
     }
     if (document.getElementById("sides").checked){
       // connecting left and right edges
       for (let i = 0; i<=num_rows-1; i++){
-        edges.push({from: all_nodes[i][0], to: all_nodes[i][num_cols-1], round: true});
+        edges.push({from: all_nodes[i][0], to: all_nodes[i][num_cols-1], round: true, dash: false});
       }
     }
   }
@@ -342,29 +350,34 @@ function generate_puzzle(){
     // horizontal edges
     for (let i = 0; i<=num_rows-2; i++){
       for (let k = 0; k<num_cols-1; k++){
-        edges.push({from: all_nodes[i][k], to: all_nodes[i+1][k+1], round: false});
+        edges.push({from: all_nodes[i][k], to: all_nodes[i+1][k+1], round: false, dash: false});
       }
     }
     // vertical edges
     for (let i = 0; i<num_rows-1; i++){
       for (let k = 0; k<=num_cols-2; k++){
-        edges.push({from: all_nodes[i+1][k], to: all_nodes[i][k+1], round: false});
+        edges.push({from: all_nodes[i+1][k], to: all_nodes[i][k+1], round: false, dash: false});
       }
     }
-    //if (document.getElementById("top_bottom").checked){
-
-      // connecting top and bottom edges
-      // for (let i = 0; i<=num_cols-1; i++)
-      //     edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
-       // for (let i = 1; i<=num_rows-1; i++)
-       //   edges.push({from: all_nodes[i][0], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
-    //}
-    // if (document.getElementById("sides").checked){
-    //   for (let i = 0; i<=num_cols-1; i++)
-    //       edges.push({from: all_nodes[i][0], to: all_nodes[num_rows-1][num_cols-i-1], round: true});
-       // for (let i = 1; i<=num_rows-1; i++)
-       //   edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-i-1][num_cols-1], round: true});
-    //}
-   }
+    if (document.getElementById("sides").checked){
+      //connecting sides
+      for (let i = 0; i<num_rows-1; i++){
+          edges.push({from: all_nodes[i][0], to: all_nodes[i+1][num_cols-1], round: false, dash: false});
+          edges.push({from: all_nodes[i][num_cols-1], to: all_nodes[i+1][0], round: false, dash: false});
+          console.log(i);
+      }
+    }
+    if (document.getElementById("top_bottom").checked){
+      //connecting top and bottom edges
+      for (let i = 0; i<num_cols-1; i++){
+        edges.push({from: all_nodes[0][i], to: all_nodes[num_rows-1][i+1], round: false, dash: false});
+        edges.push({from: all_nodes[num_rows-1][i], to: all_nodes[0][i+1], round: false, dash: false});
+      }
+    }
+    if (document.getElementById("top_bottom").checked && document.getElementById("sides").checked){
+      edges.push({from: all_nodes[0][0], to: all_nodes[num_rows-1][num_cols-1], round: true, dash: true});
+      edges.push({from: all_nodes[num_rows-1][0], to: all_nodes[0][num_cols-1], round: true, dash: true});
+    }
+  }
   draw();
 }
