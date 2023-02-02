@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="index.css">
     <script defer type="text/javascript" src="load.js"></script>
 </head>
-<body>
+<body onload="updateSavedPuzzles()">
   <a href="interface.html">Main page</a>
     <section class = "controls">
       <p>
@@ -34,6 +34,11 @@
       <p>
         <button id = "generate", onclick="generate_puzzle()", type="button">Generate puzzle</button>
         <button id = "clear", onclick="clear_puzzle()", type="button">Clear puzzle</button>
+        <button id="save" onclick="save_puzzle()" type="button">Save puzzle</button>
+        <button id="load" onclick="load_puzzle()" type="button">Load puzzle</button>
+        <select id="loadSelector" ></select>
+        <label for="loadSelector">Select a saved graph to load:</label>
+        <button id="delete" onclick="delete_puzzle()" type="button">Delete puzzle</button>
       </p>
     </section>
     <div id='d1' style=" top:0; left:0; z-index:1">

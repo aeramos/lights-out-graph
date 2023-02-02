@@ -381,3 +381,63 @@ function generate_puzzle(){
   }
   draw();
 }
+
+function save_puzzle() {
+    save();
+    updateSavedPuzzles();
+    alert("Successfully saved puzzle!");
+}
+
+function updateSavedPuzzles() {
+    let graphStorage = JSON.parse(localStorage.getItem("graphStorage"));
+    let selector = document.getElementById("loadSelector");
+    selector.innerHTML = "";
+    for (let i = 0; i < graphStorage.length; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.innerHTML = "Graph " + i;
+        selector.appendChild(option);
+    }
+}
+
+function load_puzzle() {
+    let selector = document.getElementById("loadSelector");
+    let graph = load(selector.value);
+    if (graph) {
+        nodes = graph.nodes;
+        edges = graph.edges;
+        draw();
+    }
+}
+
+function save() {
+    let graphStorage = JSON.parse(localStorage.getItem("graphStorage"));
+    if (!graphStorage) {
+        graphStorage = [];
+    }
+    graphStorage.push({
+        nodes: nodes,
+        edges: edges
+    });
+    localStorage.setItem("graphStorage", JSON.stringify(graphStorage));
+}
+
+function load(index) {
+    let graphStorage = JSON.parse(localStorage.getItem("graphStorage"));
+    if (graphStorage[index]) {
+        return graphStorage[index];
+    } else {
+        return null;
+    }
+}
+
+function delete_puzzle() {
+    let selector = document.getElementById("loadSelector");
+    let graphStorage = JSON.parse(localStorage.getItem("graphStorage"));
+    if (!graphStorage) {
+        return;
+    }
+    graphStorage.splice(selector.value, 1);
+    localStorage.setItem("graphStorage", JSON.stringify(graphStorage));
+    updateSavedPuzzles();
+}
