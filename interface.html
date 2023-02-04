@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <title>Map</title>
     <link rel="stylesheet" href="index.css">
+    <script type="text/javascript" src="CyclicalNode.js"></script>
+    <script type="text/javascript" src="DihedralNode.js"></script>
+    <script type="text/javascript" src="GraphicalNode.js"></script>
     <script defer type="text/javascript" src="load.js"></script>
 </head>
 <body onload="updateSavedPuzzles()">
@@ -32,13 +35,25 @@
         </select>
       </p>
       <p>
-        <button id = "generate", onclick="generate_puzzle()", type="button">Generate puzzle</button>
-        <button id = "clear", onclick="clear_puzzle()", type="button">Clear puzzle</button>
+        <div id="creatingMode">
+            <button id="generate" onclick="generate_puzzle()" type="button">Generate puzzle</button>
+            <button id="clear" onclick="clear_puzzle()" type="button">Clear puzzle</button>
+
+            <label for="groupOrder">Group order:</label>
+            <input type="text" width="20px" id="groupOrder" value="2" onchange="group_order()" />
+
+            <label for="cyclicalRadio">Cyclical</label>
+            <input id="cyclicalRadio" type="radio" name="groupType" value="cyclical" onclick="puzzle_type()" />
+            <label for="dihedralRadio">Dihedral:</label>
+            <input id="dihedralRadio" type="radio" name="groupType" value="dihedral" onclick="puzzle_type()" />
+        </div>
         <button id="save" onclick="save_puzzle()" type="button">Save puzzle</button>
         <button id="load" onclick="load_puzzle()" type="button">Load puzzle</button>
-        <select id="loadSelector" ></select>
         <label for="loadSelector">Select a saved graph to load:</label>
+        <select id="loadSelector" ></select>
         <button id="delete" onclick="delete_puzzle()" type="button">Delete puzzle</button>
+        <label for="groupMultiplier">Multiplier:</label>
+        <input id="groupMultiplier" type="text" width="20px" value="1" onchange="group_multiplier()" />
       </p>
     </section>
     <div id='d1' style=" top:0; left:0; z-index:1">

@@ -5,6 +5,10 @@ var nodes = [];
 var edges = [];
 var clicks = 1;
 
+let mode = "cyclical";
+let groupOrder = 2;
+let groupMultiplier = 1;
+
 const colors = ['#FFFFFF', "#ffc800",'#e6194b', '#3cb44b', '#4363d8', '#f58231', '#911eb4', '#46f0f0',
                    '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ffe119', '#9a6324', '#fffac8',
                    '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
@@ -26,8 +30,20 @@ child.parentNode.insertBefore(text, child);
 
 btn_mode.addEventListener('click', function handleClick() {
   if (btn_mode.textContent === 'Editing'){
-    for (i = 0; i < nodes.length; i++)
-      nodes[i].value = 0;
+    for (const vertex of nodes) {
+        switch (mode) {
+            case "cyclical":
+                console.log("cyc");
+                vertex.node = new CyclicalNode(groupOrder);
+                break;
+            case "dihedral":
+                console.log("dih");
+                vertex.node = new DihedralNode(groupOrder);
+                break;
+            default:
+                console.log("err");
+        }
+    }
     btn_mode.textContent = 'Playing';
     btn_clear.textContent = 'Reset Puzzle';
     if(document.getElementById("legend")!=null)
@@ -38,7 +54,7 @@ btn_mode.addEventListener('click', function handleClick() {
     btn_mode.textContent = 'Editing';
     btn_clear.textContent = 'Clear Puzzle';
     for (i = 0; i < nodes.length; i++)
-      nodes[i].value = 0;
+      nodes[i].node.value = 0;
     draw();
     if(document.getElementById("legend")!=null)
       document.getElementById("legend").remove();
@@ -82,23 +98,19 @@ function within(x, y) {
         return (x-n.x)**2+(y-n.y)**2 <= n.radius**2;
     });
 }
+
 window.onmousemove = move;
 window.onmousedown = down;
 window.onmouseup = up;
 window.onkeyup = key_up;
-function create_node(x_0, y_0){
-  let node = {
-      x: x_0,
-      y: y_0,
-      radius: 12,
-      selected: false,
-      value : 0,
-      clicks : 0
-  };
-  nodes.push(node);
-  draw();
-  return node;
+
+function create_node(x, y) {
+    let node = new GraphicalNode(x, y, 12);
+    nodes.push(node);
+    draw();
+    return node;
 }
+
 function create_edge(fromNode, toNode, round, dash){
   if(dash)
     context.setLineDash([5, 3]);
@@ -132,10 +144,11 @@ function draw() {
             let node = nodes[i];
             context.setLineDash([]);
             context.beginPath();
-            if (node.selected)
-              context.fillStyle = SELECTED;
-            else
-              context.fillStyle = colors[node.value];
+            if (node.selected) {
+                context.fillStyle = SELECTED;
+            } else {
+                context.fillStyle = colors[node.node ? node.node.value : 0];
+            }
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
             context.fill();
             context.stroke();
@@ -146,18 +159,19 @@ function draw() {
             let node = nodes[i];
             context.setLineDash([]);
             context.beginPath();
-            context.fillStyle = colors[node.value];
+            context.fillStyle = colors[node.node ? node.node.value : 0];
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
             context.fill();
             context.stroke();
             context.font = "12px Verdana";
             context.beginPath();
             context.fillStyle = "#000000";
-            if (node.clicks.toString().length>1){
-              context.fillText(node.clicks.toString(), node.x-8, node.y+4);
+            let string = node.node.toString();
+            if (string.length>1){
+              context.fillText(string, node.x-8, node.y+4);
             }
             else
-              context.fillText(node.clicks.toString(), node.x-3, node.y+4);
+              context.fillText(string, node.x-3, node.y+4);
             context.fill();
         }
     }
@@ -222,23 +236,24 @@ function up(e) {
     else{
       let target = within(e.offsetX, e.offsetY);
       if (target){
-        target.value = (target.value + clicks)%num_colors;
-        target.clicks = (target.clicks + clicks)%num_colors;
-        for(let i = 0; i < edges.length;i++){
-          var other = undefined;
-          if (edges[i].from == target)
-            other = edges[i].to;
-          else if (edges[i].to == target)
-            other = edges[i].from;
-          if (other)
-            other.value = (other.value + clicks)%num_colors;
-        }
+          target.node.multiply(groupMultiplier, true);
+          for(let i = 0; i < edges.length;i++) {
+              let other = undefined;
+              if (edges[i].from === target) {
+                  other = edges[i].to;
+              } else if (edges[i].to === target) {
+                  other = edges[i].from;
+              }
+              if (other) {
+                  other.node.multiply(groupMultiplier, false);
+              }
+          }
         draw();
         congratulate();
       }
-
     }
 }
+
 function key_up(e){
   if (btn_mode.textContent == 'Editing'){
     if (e.code == 'Backspace' || e.code == 'Delete'){
@@ -269,19 +284,19 @@ function clear_puzzle(){
   }
   else {
     for (i = 0; i < nodes.length; i++){
-      nodes[i].value = 0;
-      nodes[i].clicks = 0;
+      nodes[i].node.value = 0;
+      nodes[i].node.clicks = 0;
     }
   }
   draw();
 }
 function congratulate(){
   if (document.getElementById("congratulate").checked){
-    var val = nodes[0].value;
+    var val = nodes[0].node.value;
     var solved = true;
     var message = ""
     for (i=1; i<nodes.length; i++){
-      if (nodes[i].value != val)
+      if (nodes[i].node.value != val)
         solved = false;
     }
     if (solved){
@@ -440,4 +455,25 @@ function delete_puzzle() {
     graphStorage.splice(selector.value, 1);
     localStorage.setItem("graphStorage", JSON.stringify(graphStorage));
     updateSavedPuzzles();
+}
+
+function puzzle_type() {
+    let buttons = document.querySelectorAll("input[name='groupType']");
+    for (const button of buttons) {
+        console.log(button.checked);
+        if (button.checked) {
+            mode = button.value;
+            break;
+        }
+    }
+}
+
+function group_order() {
+    // todo: add input validation
+    groupOrder = parseInt(document.getElementById("groupOrder").value);
+}
+
+function group_multiplier() {
+    // todo: add input validation
+    groupMultiplier = parseInt(document.getElementById("groupMultiplier").value);
 }
