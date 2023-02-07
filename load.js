@@ -5,7 +5,7 @@ var nodes = [];
 var edges = [];
 var clicks = 1;
 
-let mode = "cyclical";
+let groupType = "cyclical";
 let groupOrder = 2;
 let groupMultiplier = 1;
 
@@ -31,17 +31,15 @@ child.parentNode.insertBefore(text, child);
 btn_mode.addEventListener('click', function handleClick() {
   if (btn_mode.textContent === 'Editing'){
     for (const vertex of nodes) {
-        switch (mode) {
+        switch (groupType) {
             case "cyclical":
-                console.log("cyc");
                 vertex.node = new CyclicalNode(groupOrder);
                 break;
             case "dihedral":
-                console.log("dih");
                 vertex.node = new DihedralNode(groupOrder);
                 break;
             default:
-                console.log("err");
+                alert("Something went wrong setting the group modes.");
         }
     }
     btn_mode.textContent = 'Playing';
@@ -237,6 +235,16 @@ function up(e) {
       let target = within(e.offsetX, e.offsetY);
       if (target){
           target.node.multiply(groupMultiplier, true);
+          if (groupType === "dihedral") {
+              let index;
+              for (let i = 0; i < nodes.length; i++) {
+                  if (nodes[i] === target) {
+                      index = i;
+                      break;
+                  }
+              }
+              console.log(index + ": " + groupMultiplier);
+          }
           for(let i = 0; i < edges.length;i++) {
               let other = undefined;
               if (edges[i].from === target) {
@@ -379,7 +387,6 @@ function generate_puzzle(){
       for (let i = 0; i<num_rows-1; i++){
           edges.push({from: all_nodes[i][0], to: all_nodes[i+1][num_cols-1], round: false, dash: false});
           edges.push({from: all_nodes[i][num_cols-1], to: all_nodes[i+1][0], round: false, dash: false});
-          console.log(i);
       }
     }
     if (document.getElementById("top_bottom").checked){
@@ -460,9 +467,8 @@ function delete_puzzle() {
 function puzzle_type() {
     let buttons = document.querySelectorAll("input[name='groupType']");
     for (const button of buttons) {
-        console.log(button.checked);
         if (button.checked) {
-            mode = button.value;
+            groupType = button.value;
             break;
         }
     }
